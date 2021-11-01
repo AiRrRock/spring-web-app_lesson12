@@ -4,6 +4,7 @@ import com.geekbrains.webapp.api.dtos.OrderItemDto;
 import com.geekbrains.webapp.api.dtos.ProductDto;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,10 +12,11 @@ import java.util.List;
 @Data
 public class Cart {
     private List<OrderItemDto> items;
-    private int totalPrice;
+    private BigDecimal totalPrice;
 
     public Cart() {
         this.items = new ArrayList<>();
+        this.totalPrice = new BigDecimal(0);
     }
 
     public void add(ProductDto product) {
@@ -51,13 +53,13 @@ public class Cart {
 
     public void clear() {
         items.clear();
-        totalPrice = 0;
+        totalPrice = new BigDecimal(0);
     }
 
     private void recalculate() {
-        totalPrice = 0;
+        totalPrice = new BigDecimal(0);
         for (OrderItemDto i : items) {
-            totalPrice += i.getPrice();
+            totalPrice = totalPrice.add(i.getPrice());
         }
     }
 

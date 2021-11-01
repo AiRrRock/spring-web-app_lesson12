@@ -6,13 +6,13 @@ spring:
     name: gateway-service
   cloud:
     gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins: "http://localhost:3000"
-            allowedMethods:
-              - GET
-              - POST
+            allowedOrigins: "*"
+            allowedMethods: "*"
             allowedHeaders: "*"
       routes:
         - id: core-service

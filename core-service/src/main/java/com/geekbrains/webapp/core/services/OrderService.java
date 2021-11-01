@@ -1,13 +1,13 @@
 package com.geekbrains.webapp.core.services;
 
-import com.geekbrains.webapp.api.dtos.CartDto;
-import com.geekbrains.webapp.api.dtos.OrderDetailsDto;
-import com.geekbrains.webapp.api.dtos.OrderDto;
-import com.geekbrains.webapp.api.dtos.OrderItemDto;
+import com.geekbrains.webapp.api.dtos.*;
+import com.geekbrains.webapp.api.exceptions.MarketError;
 import com.geekbrains.webapp.api.exceptions.ResourceNotFoundException;
 import com.geekbrains.webapp.core.integration.CartServiceIntegration;
 import com.geekbrains.webapp.core.model.*;
 import com.geekbrains.webapp.core.repositories.OrderRepository;
+import com.geekbrains.webapp.core.repositories.OrderStatusRepository;
+import com.geekbrains.webapp.core.repositories.StatusRepository;
 import com.geekbrains.webapp.core.utils.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,9 +21,16 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final OrderStatusRepository orderStatusRepository;
+    private final StatusRepository statusRepository;
+
     private final CartServiceIntegration cartServiceIntegration;
     private final ProductService productService;
     private final Converter converter;
+
+    private static final String CONFIRMED = "Confirmed";
+    private static final String PAID = "Paid";
+    private static final String DELIVERED = "Delivered";
 
     @Transactional
     public Order createOrder(String username, OrderDetailsDto orderDetailsDto) {
@@ -46,6 +53,12 @@ public class OrderService {
         order.setItems(items);
         orderRepository.save(order);
         cartServiceIntegration.clearUserCart(username);
+
+        OrderStatus status = new OrderStatus();
+        status.setOrder(order);
+        status.setStatus(statusRepository.findByStatus(CONFIRMED).get());
+        orderStatusRepository.save(status);
+
         return order;
     }
 
@@ -60,5 +73,18 @@ public class OrderService {
 
     public List<Order> findAllByUsername(String username) {
         return orderRepository.findAllByUsername(username);
+    }
+
+    @Transactional
+    public void confirmPayment(Long id, String username){
+        Order order = orderRepository.findOneByIdAndUsername(id, username).orElseThrow(()-> new ResourceNotFoundException("Не удалось найти заказ"));
+        OrderStatus status = orderStatusRepository.findByOrder(order).orElseThrow(()-> new ResourceNotFoundException("Не удалось найти статус для заказа"));
+        status.setStatus(statusRepository.findByStatus(PAID).get());
+        orderStatusRepository.save(status);
+    }
+
+    public OrderStatusDto getOrderStatus(Long id, String username) {
+        Order order = orderRepository.findOneByIdAndUsername(id, username).orElseThrow(()-> new ResourceNotFoundException("Не удалось найти заказ"));
+        return converter.orderStatusToDto(orderStatusRepository.findByOrder(order).orElseThrow(()-> new ResourceNotFoundException("Не удалось найти статус для заказа")));
     }
 }

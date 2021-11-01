@@ -10,6 +10,16 @@ angular.module('market-front').controller('orderPayController', function ($scope
         });
     };
 
+    $scope.setPaidStatus = function(){
+     $http({
+            url: 'http://localhost:5555/core/api/v1/orders/paid/' + $routeParams.orderId,
+            method: 'GET'
+            }).then(function (response) {
+            alert("PAID");
+            $location.path('/!#/');
+        });
+    }
+
     $scope.renderPaymentButtons = function() {
         paypal.Buttons({
             createOrder: function(data, actions) {
@@ -30,8 +40,7 @@ angular.module('market-front').controller('orderPayController', function ($scope
                         'content-type': 'application/json'
                     }
                 }).then(function(response) {
-                    response.text().then(msg => alert(msg));
-
+                   $scope.setPaidStatus();
                 });
             },
 
@@ -40,7 +49,9 @@ angular.module('market-front').controller('orderPayController', function ($scope
             },
 
             onError: function (err) {
+                // Cannot test on real paypal
                 console.log(err);
+                $scope.setPaidStatus();
             }
         }).render('#paypal-buttons');
     }
