@@ -2,6 +2,7 @@ package com.geekbrains.webapp.core.controllers;
 
 import com.geekbrains.webapp.api.dtos.OrderDetailsDto;
 import com.geekbrains.webapp.api.dtos.OrderDto;
+import com.geekbrains.webapp.api.dtos.OrderStatusDto;
 import com.geekbrains.webapp.api.dtos.StringResponse;
 import com.geekbrains.webapp.core.services.OrderService;
 import com.geekbrains.webapp.core.utils.Converter;
@@ -34,5 +35,15 @@ public class OrderController {
     @GetMapping("/{id}")
     public OrderDto getOrderForCurrentUser(@RequestHeader String username, @PathVariable Long id) {
         return orderService.findDtoByIdAndUsername(id, username).get();
+    }
+
+    @GetMapping("/paid/{id}")
+    public void confirmPayment(@RequestHeader String username, @PathVariable Long id) {
+        orderService.confirmPayment(id, username);
+    }
+
+    @GetMapping("/status/{id}")
+    public OrderStatusDto getStatus(@RequestHeader String username, @PathVariable Long id) {
+        return orderService.getOrderStatus(id, username);
     }
 }

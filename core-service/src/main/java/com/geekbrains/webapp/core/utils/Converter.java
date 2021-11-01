@@ -1,13 +1,7 @@
 package com.geekbrains.webapp.core.utils;
 
-import com.geekbrains.webapp.api.dtos.CategoryDto;
-import com.geekbrains.webapp.api.dtos.OrderDto;
-import com.geekbrains.webapp.api.dtos.OrderItemDto;
-import com.geekbrains.webapp.api.dtos.ProductDto;
-import com.geekbrains.webapp.core.model.Category;
-import com.geekbrains.webapp.core.model.Order;
-import com.geekbrains.webapp.core.model.OrderItem;
-import com.geekbrains.webapp.core.model.Product;
+import com.geekbrains.webapp.api.dtos.*;
+import com.geekbrains.webapp.core.model.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -30,5 +24,9 @@ public class Converter {
 
     public OrderDto orderToDto(Order order) {
         return new OrderDto(order.getId(), order.getItems().stream().map(oi -> orderItemToDto(oi)).collect(Collectors.toList()), order.getAddress(), order.getPhone(), order.getPrice());
+    }
+
+    public OrderStatusDto orderStatusToDto(OrderStatus orderStatus) {
+        return new OrderStatusDto(orderStatus.getId(), orderStatus.getOrder().getId(), orderStatus.getStatus().getId());
     }
 }
